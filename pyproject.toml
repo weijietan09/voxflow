@@ -9,7 +9,45 @@ readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
 authors = [{ name = "Cheng Jiawei" }]
+keywords = ["tts", "voice-cloning", "flow-matching", "speech-synthesis", "zero-shot"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Multimedia :: Sound/Audio :: Speech",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
 dynamic = ["version"]
+
+dependencies = [
+    "numpy>=1.23",
+    "scipy>=1.10",
+    "soundfile>=0.12",
+    "pyyaml>=6.0",
+    "pypinyin>=0.49",
+    "torch>=2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4",
+    "pytest-cov>=4.1",
+    "ruff>=0.6",
+    "mypy>=1.8",
+    "types-PyYAML",
+    "pre-commit>=3.5",
+]
+
+[project.urls]
+Homepage = "https://github.com/weijietan09/voxflow"
+Repository = "https://github.com/weijietan09/voxflow"
+Issues = "https://github.com/weijietan09/voxflow/issues"
+
+[project.scripts]
+voxflow = "voxflow.cli:main"
 
 [tool.setuptools.dynamic]
 version = { attr = "voxflow.version.__version__" }
