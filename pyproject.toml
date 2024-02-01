@@ -54,3 +54,10 @@ version = { attr = "voxflow.version.__version__" }
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-ra"
+filterwarnings = ["ignore::DeprecationWarning"]
