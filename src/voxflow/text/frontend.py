@@ -37,16 +37,28 @@ def _is_cjk(ch: str) -> bool:
     return bool(_CJK_RE.match(ch))
 
 
+def _char_language(ch: str) -> str | None:
+    """判断单个字符的语言归属；标点 / 空格返回 ``None`` 表示"中性"。"""
+    if _is_cjk(ch):
+        return "zh"
+    if ch.isascii() and (ch.isalpha() or ch.isdigit()):
+        return "en"
+    return None
+
+
 def segment_by_language(text: str) -> list[tuple[str, str]]:
     """把文本切成 ``(lang, substring)`` 片段，lang ∈ {"zh", "en"}。
 
-    这里按字符是否为汉字来分段，标点 / 空格暂时跟随相邻片段。
+    中性字符（标点 / 空格）会并入当前语言片段，避免在 "你好，world"
+    这类中英混排里被切碎，从而减少多余的停顿 token。
     """
     segments: list[tuple[str, str]] = []
     buf = ""
     cur: str | None = None
     for ch in text:
-        lang = "zh" if _is_cjk(ch) else "en"
+        lang = _char_language(ch)
+        if lang is None:
+            lang = cur if cur is not None else "en"
         if cur is None:
             cur, buf = lang, ch
         elif lang == cur:
