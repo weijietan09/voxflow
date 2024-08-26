@@ -49,3 +49,41 @@ class SpeakerEncoder(nn.Module):
         last = outputs[:, -1]
         emb = self.relu(self.proj(last))
         return F.normalize(emb, p=2, dim=-1)
+
+    @torch.inference_mode()
+    def embed_utterance(
+        self,
+        mel: torch.Tensor,
+        partial_frames: int = 160,
+        hop_frames: int = 80,
+    ) -> torch.Tensor:
+        """对整段音频做 partial-utterance 平均，得到单条 embedding。
+
+        把 ``mel``（形状 (T, mel_dim)）切成若干等长的重叠片段分别编码，
+        再对结果取平均并重新 L2 归一化。片段不足一个窗口时直接整段编码。
+        """
+        if mel.dim() == 3:
+            mel = mel.squeeze(0)
+        slices = compute_partial_slices(mel.shape[0], partial_frames, hop_frames)
+        if len(slices) == 1:
+            start, end = slices[0]
+            partials = mel[start:end].unsqueeze(0)
+        else:
+            partials = torch.stack([mel[start:end] for start, end in slices])
+        embeds = self.forward(partials)
+        mean = embeds.mean(dim=0)
+        return F.normalize(mean, p=2, dim=-1)
+
+
+def compute_partial_slices(
+    n_frames: int, partial_frames: int = 160, hop_frames: int = 80
+) -> list[tuple[int, int]]:
+    """把 ``n_frames`` 切成等长重叠片段的 (起, 止) 索引；不足一窗则整段返回。"""
+    slices: list[tuple[int, int]] = []
+    start = 0
+    while start + partial_frames <= n_frames:
+        slices.append((start, start + partial_frames))
+        start += hop_frames
+    if not slices:
+        slices.append((0, n_frames))
+    return slices
