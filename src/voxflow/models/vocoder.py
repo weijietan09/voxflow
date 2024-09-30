@@ -15,6 +15,9 @@ import torch
 import torch.nn.functional as F
 from torch import nn
 
+from voxflow.audio.mel import mel_filterbank
+from voxflow.config import AudioConfig
+
 
 def _get_padding(kernel_size: int, dilation: int) -> int:
     return (kernel_size - 1) * dilation // 2
@@ -95,3 +98,54 @@ class HiFiGANLite(nn.Module):
             x = acc / self.num_kernels
         x = self.conv_post(F.leaky_relu(x, 0.1))
         return torch.tanh(x)
+
+
+class GriffinLimVocoder(nn.Module):
+    """基于 Griffin-Lim 的免训练声码器。
+
+    先用 mel 滤波器组的伪逆把 log-mel 近似还原成线性幅度谱，再用若干轮
+    Griffin-Lim 迭代恢复相位。音质有限，但胜在不需要权重，方便早期验证链路。
+    """
+
+    def __init__(self, config: AudioConfig | None = None, n_iters: int = 32) -> None:
+        super().__init__()
+        self.config = config or AudioConfig()
+        self.n_iters = n_iters
+        fb = mel_filterbank(
+            self.config.n_mels,
+            self.config.n_fft,
+            self.config.sample_rate,
+            self.config.f_min,
+            self.config.f_max,
+        )
+        self.register_buffer("inv_filterbank", torch.linalg.pinv(fb))
+
+    def forward(self, log_mel: torch.Tensor) -> torch.Tensor:
+        """``log_mel`` 形状 (B, n_mels, T)，返回波形 (B, samples)。"""
+        cfg = self.config
+        mel_amp = torch.exp(log_mel)
+        linear = torch.matmul(self.inv_filterbank.to(mel_amp.dtype), mel_amp).clamp(min=1e-5)
+
+        window = torch.hann_window(cfg.win_length, device=log_mel.device, dtype=log_mel.dtype)
+        angle = 2.0 * torch.pi * torch.rand_like(linear)
+        phase = torch.polar(torch.ones_like(linear), angle)
+
+        wav = None
+        for _ in range(self.n_iters):
+            spec = linear * phase
+            wav = torch.istft(spec, cfg.n_fft, cfg.hop_length, cfg.win_length, window=window)
+            rebuilt = torch.stft(
+                wav,
+                cfg.n_fft,
+                cfg.hop_length,
+                cfg.win_length,
+                window=window,
+                center=True,
+                pad_mode="reflect",
+                return_complex=True,
+            )
+            phase = rebuilt / (rebuilt.abs() + 1e-8)
+
+        spec = linear * phase
+        return torch.istft(spec, cfg.n_fft, cfg.hop_length, cfg.win_length, window=window)
+
