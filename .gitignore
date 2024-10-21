@@ -27,10 +27,10 @@ htmlcov/
 *.wav
 *.flac
 !tests/**/*.wav
-data/
-runs/
-logs/
-outputs/
+/data/
+/runs/
+/logs/
+/outputs/
 
 # Editors / OS
 .idea/
