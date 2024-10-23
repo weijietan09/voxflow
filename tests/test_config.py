@@ -1,9 +1,13 @@
 """针对配置对象的单元测试。"""
 
+from pathlib import Path
+
 import pytest
 
 from voxflow.config import AudioConfig, load_yaml
 from voxflow.exceptions import ConfigError
+
+_CONFIGS = Path(__file__).resolve().parents[1] / "configs"
 
 
 def test_default_audio_config():
@@ -44,3 +48,15 @@ def test_roundtrip_dict():
 def test_load_yaml_missing_file(tmp_path):
     with pytest.raises(ConfigError):
         load_yaml(tmp_path / "nope.yaml")
+
+
+def test_shipped_base_config_loads():
+    cfg = AudioConfig.from_yaml(_CONFIGS / "base.yaml")
+    assert cfg.sample_rate == 22050
+    assert cfg.n_mels == 80
+
+
+def test_shipped_speaker_config_loads():
+    cfg = AudioConfig.from_yaml(_CONFIGS / "speaker_encoder.yaml")
+    assert cfg.sample_rate == 16000
+    assert cfg.n_mels == 40
