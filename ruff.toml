@@ -5,8 +5,10 @@ src = ["src", "tests"]
 [lint]
 select = ["E", "F", "I", "UP", "B", "C4", "SIM", "W"]
 ignore = [
-    "E501",  # line length is handled by the formatter
-    "B008",  # function calls in argument defaults are used deliberately
+    "E501",    # line length is handled by the formatter
+    "B008",    # function calls in argument defaults are used deliberately
+    "SIM905",  # keep phoneme tables as compact split() strings
+    "SIM108",  # explicit if/else is clearer than a ternary in some samplers
 ]
 
 [lint.per-file-ignores]
