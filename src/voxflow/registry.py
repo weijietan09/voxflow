@@ -21,9 +21,7 @@ class Registry(Generic[T]):
         self._name = name
         self._store: dict[str, Callable[..., T]] = {}
 
-    def register(
-        self, key: str | None = None
-    ) -> Callable[[Callable[..., T]], Callable[..., T]]:
+    def register(self, key: str | None = None) -> Callable[[Callable[..., T]], Callable[..., T]]:
         """把一个类 / 函数登记到注册表；不传 ``key`` 时使用其 ``__name__``。"""
 
         def decorator(obj: Callable[..., T]) -> Callable[..., T]:
@@ -39,9 +37,7 @@ class Registry(Generic[T]):
 
     def get(self, key: str) -> Callable[..., T]:
         if key not in self._store:
-            raise ConfigError(
-                f"{self._name} 中找不到 {key!r}，已注册: {sorted(self._store)}"
-            )
+            raise ConfigError(f"{self._name} 中找不到 {key!r}，已注册: {sorted(self._store)}")
         return self._store[key]
 
     def build(self, key: str, *args: object, **kwargs: object) -> T:

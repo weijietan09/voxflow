@@ -9,7 +9,9 @@ from voxflow.train.trainer import TrainConfig, Trainer
 
 
 def test_multi_resolution_stft_loss_finite():
-    loss_fn = MultiResolutionSTFTLoss(fft_sizes=(256, 128), hop_sizes=(64, 32), win_sizes=(256, 128))
+    loss_fn = MultiResolutionSTFTLoss(
+        fft_sizes=(256, 128), hop_sizes=(64, 32), win_sizes=(256, 128)
+    )
     pred = torch.randn(2, 4000)
     target = torch.randn(2, 4000)
     value = loss_fn(pred, target)

@@ -91,7 +91,9 @@ class MultiHeadSelfAttention(nn.Module):
         self.to_qkv = nn.Linear(dim, dim * 3)
         self.to_out = nn.Linear(dim, dim)
 
-    def forward(self, x: torch.Tensor, key_padding_mask: torch.Tensor | None = None) -> torch.Tensor:
+    def forward(
+        self, x: torch.Tensor, key_padding_mask: torch.Tensor | None = None
+    ) -> torch.Tensor:
         b, t, c = x.shape
         q, k, v = self.to_qkv(x).chunk(3, dim=-1)
         q = q.view(b, t, self.heads, self.head_dim).transpose(1, 2)
@@ -119,7 +121,9 @@ class TransformerBlock(nn.Module):
             nn.Linear(dim * ff_mult, dim),
         )
 
-    def forward(self, x: torch.Tensor, key_padding_mask: torch.Tensor | None = None) -> torch.Tensor:
+    def forward(
+        self, x: torch.Tensor, key_padding_mask: torch.Tensor | None = None
+    ) -> torch.Tensor:
         x = x + self.attn(self.norm1(x), key_padding_mask)
         x = x + self.ff(self.norm2(x))
         return x

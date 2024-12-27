@@ -46,5 +46,7 @@ def preprocess_manifest(
             }
         )
 
-    (out / "index.json").write_text(json.dumps(index, ensure_ascii=False, indent=2), encoding="utf-8")
+    (out / "index.json").write_text(
+        json.dumps(index, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
     return index
