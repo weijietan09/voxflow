@@ -49,6 +49,8 @@ class MelSpectrogram(torch.nn.Module):
     滤波器组作为 buffer 注册，随模型一起 ``.to(device)``。
     """
 
+    filterbank: torch.Tensor
+
     def __init__(self, config: AudioConfig | None = None) -> None:
         super().__init__()
         self.config = config or AudioConfig()

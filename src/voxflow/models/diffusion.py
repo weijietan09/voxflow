@@ -14,13 +14,21 @@ from torch import nn
 from voxflow.models.estimator import VectorFieldEstimator
 
 
-def linear_beta_schedule(n_steps: int, beta_start: float = 1e-4, beta_end: float = 0.02) -> torch.Tensor:
+def linear_beta_schedule(
+    n_steps: int, beta_start: float = 1e-4, beta_end: float = 0.02
+) -> torch.Tensor:
     """线性 β 调度。"""
     return torch.linspace(beta_start, beta_end, n_steps)
 
 
 class GaussianDiffusion(nn.Module):
     """标准 DDPM，噪声预测参数化。"""
+
+    betas: torch.Tensor
+    alphas: torch.Tensor
+    alphas_cumprod: torch.Tensor
+    sqrt_acp: torch.Tensor
+    sqrt_one_minus_acp: torch.Tensor
 
     def __init__(
         self,
