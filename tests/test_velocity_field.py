@@ -2,7 +2,7 @@
 
 import torch
 
-from voxflow.models.estimator import EstimatorConfig, VectorFieldEstimator
+from voxflow.models.velocity_field import EstimatorConfig, VectorFieldEstimator
 
 
 def _tiny():
