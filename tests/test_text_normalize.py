@@ -53,3 +53,8 @@ def test_collapse_whitespace():
 
 def test_normalize_keeps_chinese():
     assert normalize("你好，世界！") == "你好，世界！"
+
+
+def test_normalize_strips_zero_width():
+    dirty = "\u4f60\u200b\u597d\ufeff"  # 你<ZWSP>好<BOM>
+    assert normalize(dirty) == "\u4f60\u597d"
