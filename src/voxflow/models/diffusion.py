@@ -41,7 +41,7 @@ class GaussianDiffusion(nn.Module):
         self.estimator = estimator
         self.n_steps = n_steps
 
-        betas = linear_beta_schedule(n_steps, beta_start, beta_end)
+        betas = linear_beta_schedule(n_steps, beta_start, beta_end).clamp(1e-5, 0.999)
         alphas = 1.0 - betas
         alphas_cumprod = torch.cumprod(alphas, dim=0)
 
