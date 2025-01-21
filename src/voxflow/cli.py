@@ -53,8 +53,14 @@ def _cmd_embed(args: argparse.Namespace) -> int:
 
 
 def _cmd_synth(args: argparse.Namespace) -> int:
+    import sys
+
     from voxflow.audio.io import save_wav
     from voxflow.pipeline import PipelineConfig, VoiceCloner
+
+    if not args.reference.is_file():
+        print(f"参考音频不存在: {args.reference}", file=sys.stderr)
+        return 2
 
     config = PipelineConfig()
     config.n_timesteps = args.steps
