@@ -25,6 +25,13 @@ def build_parser() -> argparse.ArgumentParser:
     embed.add_argument("reference", type=Path, help="参考音频文件（wav/flac 等）")
     embed.add_argument("-o", "--output", type=Path, default=None, help="保存为 .npy 文件")
 
+    synth = sub.add_parser("synth", help="用参考音频克隆音色，合成给定文本")
+    synth.add_argument("text", help="要合成的文本（支持中英混排）")
+    synth.add_argument("-r", "--reference", type=Path, required=True, help="参考音频文件")
+    synth.add_argument("-o", "--output", type=Path, default=Path("output.wav"), help="输出 wav 路径")
+    synth.add_argument("-l", "--language", default="auto", help="语言：auto/zh/en")
+    synth.add_argument("--steps", type=int, default=10, help="流匹配采样步数")
+
     return parser
 
 
@@ -43,11 +50,26 @@ def _cmd_embed(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_synth(args: argparse.Namespace) -> int:
+    from voxflow.audio.io import save_wav
+    from voxflow.pipeline import PipelineConfig, VoiceCloner
+
+    config = PipelineConfig()
+    config.n_timesteps = args.steps
+    cloner = VoiceCloner(config)
+    wav = cloner.clone(args.text, args.reference, args.language)
+    save_wav(args.output, wav, config.audio.sample_rate)
+    print(f"已写出 {args.output}（{wav.size} 采样点，{config.audio.sample_rate} Hz）")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
     if args.command == "embed":
         return _cmd_embed(args)
+    if args.command == "synth":
+        return _cmd_synth(args)
     parser.print_help()
     return 1
 
