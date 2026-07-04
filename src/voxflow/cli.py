@@ -28,7 +28,9 @@ def build_parser() -> argparse.ArgumentParser:
     synth = sub.add_parser("synth", help="用参考音频克隆音色，合成给定文本")
     synth.add_argument("text", help="要合成的文本（支持中英混排）")
     synth.add_argument("-r", "--reference", type=Path, required=True, help="参考音频文件")
-    synth.add_argument("-o", "--output", type=Path, default=Path("output.wav"), help="输出 wav 路径")
+    synth.add_argument(
+        "-o", "--output", type=Path, default=Path("output.wav"), help="输出 wav 路径"
+    )
     synth.add_argument("-l", "--language", default="auto", help="语言：auto/zh/en")
     synth.add_argument("--steps", type=int, default=10, help="流匹配采样步数")
 

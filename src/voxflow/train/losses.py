@@ -28,7 +28,9 @@ class STFTLoss(nn.Module):
         super().__init__()
         self.n_fft, self.hop, self.win = n_fft, hop, win
 
-    def forward(self, pred: torch.Tensor, target: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
+    def forward(
+        self, pred: torch.Tensor, target: torch.Tensor
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         pred_mag = _stft_magnitude(pred, self.n_fft, self.hop, self.win)
         target_mag = _stft_magnitude(target, self.n_fft, self.hop, self.win)
         sc = torch.norm(target_mag - pred_mag, p="fro") / (torch.norm(target_mag, p="fro") + 1e-7)

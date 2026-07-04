@@ -13,7 +13,9 @@ from torch import nn
 class DurationPredictor(nn.Module):
     """几层 1D 卷积，回归每个音素的对数时长。"""
 
-    def __init__(self, hidden: int, kernel_size: int = 3, n_layers: int = 2, dropout: float = 0.1) -> None:
+    def __init__(
+        self, hidden: int, kernel_size: int = 3, n_layers: int = 2, dropout: float = 0.1
+    ) -> None:
         super().__init__()
         padding = kernel_size // 2
         layers: list[nn.Module] = []
@@ -34,9 +36,7 @@ class DurationPredictor(nn.Module):
         return log_dur
 
 
-def regulate_length(
-    mu: torch.Tensor, durations: torch.Tensor
-) -> tuple[torch.Tensor, torch.Tensor]:
+def regulate_length(mu: torch.Tensor, durations: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
     """按整数时长把逐音素条件展开到逐帧。
 
     参数

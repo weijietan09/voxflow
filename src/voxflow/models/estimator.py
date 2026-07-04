@@ -132,4 +132,3 @@ class VectorFieldEstimator(nn.Module):
 
         h = self.out_act(self.out_norm(h))
         return self.out_conv(h)
-

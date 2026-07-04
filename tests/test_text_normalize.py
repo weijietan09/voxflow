@@ -1,14 +1,13 @@
 """文本归一化的单元测试。"""
 
+import pytest
+
 from voxflow.text.normalize import (
     collapse_whitespace,
     fullwidth_to_halfwidth,
     normalize,
     number_to_chinese,
 )
-
-
-import pytest
 
 
 @pytest.mark.parametrize(
@@ -38,7 +37,6 @@ def test_normalize_reads_numbers_in_chinese():
 
 def test_normalize_decimal():
     assert normalize("圆周率约3.14", language="zh") == "圆周率约三点一四"
-
 
 
 def test_fullwidth_ascii_to_halfwidth():
