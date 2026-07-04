@@ -107,9 +107,7 @@ class HiFiGANLite(nn.Module):
         x = self.conv_pre(mel)
         for i, up in enumerate(self.ups):
             x = up(F.leaky_relu(x, 0.1))
-            outs = [
-                self.resblocks[i * self.num_kernels + j](x) for j in range(self.num_kernels)
-            ]
+            outs = [self.resblocks[i * self.num_kernels + j](x) for j in range(self.num_kernels)]
             x = torch.stack(outs, dim=0).sum(dim=0) / self.num_kernels
         x = self.conv_post(F.leaky_relu(x, 0.1))
         return torch.tanh(x)
