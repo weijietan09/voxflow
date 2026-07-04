@@ -15,6 +15,82 @@ _FULLWIDTH_SPACE = 0x3000
 _KEEP_PUNCT = "，。！？、；：…—,.!?;:"
 
 _WHITESPACE_RE = re.compile(r"\s+")
+_DIGIT_RUN_RE = re.compile(r"\d+(?:\.\d+)?")
+
+_CN_DIGITS = "零一二三四五六七八九"
+_CN_SMALL_UNITS = ["", "十", "百", "千"]
+_CN_BIG_UNITS = ["", "万", "亿", "兆"]
+
+
+def _section_to_chinese(sec: int) -> str:
+    """把 0-9999 的整数读成中文（不含大单位）。"""
+    out = ""
+    pos = 0
+    while sec > 0:
+        digit = sec % 10
+        if digit != 0:
+            out = _CN_DIGITS[digit] + _CN_SMALL_UNITS[pos] + out
+        elif out and not out.startswith("零"):
+            out = "零" + out
+        sec //= 10
+        pos += 1
+    return out
+
+
+def number_to_chinese(n: int) -> str:
+    """把整数读成中文，例如 105 -> 一百零五、10001 -> 一万零一。"""
+    if n == 0:
+        return "零"
+    negative = n < 0
+    n = abs(n)
+
+    sections: list[int] = []
+    while n > 0:
+        sections.append(n % 10000)
+        n //= 10000
+
+    result = ""
+    for i in range(len(sections) - 1, -1, -1):
+        sec = sections[i]
+        if sec == 0:
+            if result and not result.endswith("零"):
+                result += "零"
+            continue
+        if result and sec < 1000 and not result.endswith("零"):
+            result += "零"
+        result += _section_to_chinese(sec) + (_CN_BIG_UNITS[i] if i > 0 else "")
+
+    result = re.sub("零+", "零", result).rstrip("零")
+    if result.startswith("一十"):
+        result = result[1:]
+    return ("负" if negative else "") + result
+
+
+def _read_number_token(token: str) -> str:
+    """读一个数字串，支持一位小数点（3.14 -> 三点一四）。"""
+    if "." in token:
+        int_part, frac_part = token.split(".", 1)
+        head = number_to_chinese(int(int_part)) if int_part else "零"
+        tail = "".join(_CN_DIGITS[int(d)] for d in frac_part)
+        return f"{head}点{tail}"
+    return number_to_chinese(int(token))
+
+
+def normalize_numbers(text: str) -> str:
+    """把文本里的阿拉伯数字替换成中文读法。"""
+    return _DIGIT_RUN_RE.sub(lambda m: _read_number_token(m.group()), text)
+
+
+def normalize(text: str, language: str = "zh") -> str:
+    """对输入文本做基础归一化。
+
+    对中文（``language`` 以 ``zh`` 开头）会额外把阿拉伯数字转成中文读法。
+    """
+    text = fullwidth_to_halfwidth(text)
+    text = collapse_whitespace(text)
+    if language.lower().startswith("zh"):
+        text = normalize_numbers(text)
+    return text
 
 
 def fullwidth_to_halfwidth(text: str) -> str:
@@ -34,14 +110,3 @@ def fullwidth_to_halfwidth(text: str) -> str:
 def collapse_whitespace(text: str) -> str:
     """把连续空白压成单个空格，并去掉首尾空白。"""
     return _WHITESPACE_RE.sub(" ", text).strip()
-
-
-def normalize(text: str, language: str = "zh") -> str:
-    """对输入文本做基础归一化。
-
-    参数 ``language`` 目前只用于挑选后续步骤（数字读法等），
-    这一层本身与语言无关。
-    """
-    text = fullwidth_to_halfwidth(text)
-    text = collapse_whitespace(text)
-    return text
