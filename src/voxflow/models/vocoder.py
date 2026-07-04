@@ -26,17 +26,31 @@ def _get_padding(kernel_size: int, dilation: int) -> int:
 class ResBlock(nn.Module):
     """HiFi-GAN 的多膨胀残差块。"""
 
-    def __init__(self, channels: int, kernel_size: int = 3, dilations: Sequence[int] = (1, 3, 5)) -> None:
+    def __init__(
+        self, channels: int, kernel_size: int = 3, dilations: Sequence[int] = (1, 3, 5)
+    ) -> None:
         super().__init__()
         self.convs1 = nn.ModuleList(
             [
-                nn.Conv1d(channels, channels, kernel_size, dilation=d, padding=_get_padding(kernel_size, d))
+                nn.Conv1d(
+                    channels,
+                    channels,
+                    kernel_size,
+                    dilation=d,
+                    padding=_get_padding(kernel_size, d),
+                )
                 for d in dilations
             ]
         )
         self.convs2 = nn.ModuleList(
             [
-                nn.Conv1d(channels, channels, kernel_size, dilation=1, padding=_get_padding(kernel_size, 1))
+                nn.Conv1d(
+                    channels,
+                    channels,
+                    kernel_size,
+                    dilation=1,
+                    padding=_get_padding(kernel_size, 1),
+                )
                 for _ in dilations
             ]
         )
@@ -73,7 +87,9 @@ class HiFiGANLite(nn.Module):
         channels = base_channels
         for rate, kernel in zip(upsample_rates, upsample_kernel_sizes, strict=True):
             self.ups.append(
-                nn.ConvTranspose1d(channels, channels // 2, kernel, stride=rate, padding=(kernel - rate) // 2)
+                nn.ConvTranspose1d(
+                    channels, channels // 2, kernel, stride=rate, padding=(kernel - rate) // 2
+                )
             )
             channels //= 2
 
@@ -91,11 +107,10 @@ class HiFiGANLite(nn.Module):
         x = self.conv_pre(mel)
         for i, up in enumerate(self.ups):
             x = up(F.leaky_relu(x, 0.1))
-            acc = None
-            for j in range(self.num_kernels):
-                out = self.resblocks[i * self.num_kernels + j](x)
-                acc = out if acc is None else acc + out
-            x = acc / self.num_kernels
+            outs = [
+                self.resblocks[i * self.num_kernels + j](x) for j in range(self.num_kernels)
+            ]
+            x = torch.stack(outs, dim=0).sum(dim=0) / self.num_kernels
         x = self.conv_post(F.leaky_relu(x, 0.1))
         return torch.tanh(x)
 
@@ -106,6 +121,8 @@ class GriffinLimVocoder(nn.Module):
     先用 mel 滤波器组的伪逆把 log-mel 近似还原成线性幅度谱，再用若干轮
     Griffin-Lim 迭代恢复相位。音质有限，但胜在不需要权重，方便早期验证链路。
     """
+
+    inv_filterbank: torch.Tensor
 
     def __init__(self, config: AudioConfig | None = None, n_iters: int = 32) -> None:
         super().__init__()
@@ -148,4 +165,3 @@ class GriffinLimVocoder(nn.Module):
 
         spec = linear * phase
         return torch.istft(spec, cfg.n_fft, cfg.hop_length, cfg.win_length, window=window)
-

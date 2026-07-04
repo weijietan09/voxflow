@@ -42,7 +42,7 @@ def chinese_to_tokens(text: str) -> list[str]:
         text,
         style=Style.TONE3,
         neutral_tone_with_five=True,
-        errors=lambda chars: list(chars),
+        errors=lambda chars: list(chars),  # type: ignore[arg-type, return-value]
     )
     for raw in syllables:
         syl = _normalize_syllable(raw)

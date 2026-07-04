@@ -30,7 +30,11 @@ ConditionFn = Callable[[dict], tuple[torch.Tensor, ...]]
 
 
 class Trainer:
-    """针对暴露了 ``compute_loss`` 的模型的通用训练器。"""
+    """针对暴露了 ``compute_loss`` 的模型的通用训练器。
+
+    ``model`` 需要是一个 ``nn.Module`` 且实现 ``compute_loss(*tensors) -> Tensor``
+    （例如 :class:`~voxflow.models.flow_matching.ConditionalFlowMatching`）。
+    """
 
     def __init__(
         self,
@@ -51,7 +55,7 @@ class Trainer:
     def train_step(self, batch: dict) -> float:
         self.model.train()
         args = self.conditioner(batch)
-        loss = self.model.compute_loss(*args)
+        loss = self.model.compute_loss(*args)  # type: ignore[operator]
 
         self.optimizer.zero_grad()
         loss.backward()
