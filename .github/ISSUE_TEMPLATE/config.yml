@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 讨论区
+    url: https://github.com/weijietan09/voxflow/discussions
+    about: 使用问题、想法与经验分享请在讨论区发帖。
