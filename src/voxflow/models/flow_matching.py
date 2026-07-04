@@ -57,3 +57,30 @@ class ConditionalFlowMatching(nn.Module):
         diff = (pred - target) * mask
         denom = mask.sum() * x1.shape[1] + 1e-8
         return diff.pow(2).sum() / denom
+
+    @torch.inference_mode()
+    def sample(
+        self,
+        mu: torch.Tensor,
+        spk: torch.Tensor,
+        n_timesteps: int = 10,
+        temperature: float = 1.0,
+    ) -> torch.Tensor:
+        """从噪声出发用欧拉法积分，生成 mel，形状与 ``mu`` 相同。
+
+        ``n_timesteps`` 越大越接近 ODE 精确解，但推理越慢；
+        流匹配的一大好处正是很少的步数（个位数）也能出可用结果。
+        """
+        if n_timesteps < 1:
+            raise ValueError("n_timesteps 必须 >= 1")
+        batch, _, length = mu.shape
+        x = torch.randn(batch, self.n_mels, length, device=mu.device, dtype=mu.dtype)
+        x = x * temperature
+
+        t_span = torch.linspace(0.0, 1.0, n_timesteps + 1, device=mu.device, dtype=mu.dtype)
+        for i in range(n_timesteps):
+            t_cur = t_span[i].expand(batch)
+            dt = t_span[i + 1] - t_span[i]
+            velocity = self.estimator(x, t_cur, mu, spk)
+            x = x + dt * velocity
+        return x
