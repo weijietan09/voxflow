@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "voxflow"
+description = "零样本声音克隆 TTS 工具包：说话人编码器 + 流匹配/扩散声学模型 + 声码器"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Cheng Jiawei" }]
+dynamic = ["version"]
+
+[tool.setuptools.dynamic]
+version = { attr = "voxflow.version.__version__" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
