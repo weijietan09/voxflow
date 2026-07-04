@@ -1,0 +1,15 @@
+[run]
+source = voxflow
+branch = True
+omit =
+    */__main__.py
+    */cli.py
+
+[report]
+show_missing = True
+exclude_lines =
+    pragma: no cover
+    raise NotImplementedError
+    if __name__ == .__main__.:
+    if TYPE_CHECKING:
+    \.\.\.
