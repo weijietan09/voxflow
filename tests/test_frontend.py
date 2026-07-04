@@ -9,6 +9,11 @@ def test_segment_splits_zh_en():
     assert segs == [("zh", "你好"), ("en", "world")]
 
 
+def test_punctuation_stays_with_previous_segment():
+    segs = segment_by_language("你好，world")
+    assert segs == [("zh", "你好，"), ("en", "world")]
+
+
 def test_encode_wraps_bos_eos():
     fe = TextFrontend(add_bos_eos=True)
     out = fe.encode("你好")
