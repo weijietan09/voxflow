@@ -16,6 +16,8 @@ _KEEP_PUNCT = "，。！？、；：…—,.!?;:"
 
 _WHITESPACE_RE = re.compile(r"\s+")
 _DIGIT_RUN_RE = re.compile(r"\d+(?:\.\d+)?")
+# 零宽字符：零宽空格 / 连接符 / BOM，粘贴文本里常见，需先清掉
+_ZERO_WIDTH_RE = re.compile("[\u200b\u200c\u200d\ufeff]")
 
 _CN_DIGITS = "零一二三四五六七八九"
 _CN_SMALL_UNITS = ["", "十", "百", "千"]
@@ -86,6 +88,7 @@ def normalize(text: str, language: str = "zh") -> str:
 
     对中文（``language`` 以 ``zh`` 开头）会额外把阿拉伯数字转成中文读法。
     """
+    text = _ZERO_WIDTH_RE.sub("", text)
     text = fullwidth_to_halfwidth(text)
     text = collapse_whitespace(text)
     if language.lower().startswith("zh"):
