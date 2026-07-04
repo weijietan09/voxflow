@@ -2,8 +2,8 @@
 
 import torch
 
-from voxflow.models.estimator import EstimatorConfig, VectorFieldEstimator
 from voxflow.models.flow_matching import ConditionalFlowMatching
+from voxflow.models.velocity_field import EstimatorConfig, VectorFieldEstimator
 from voxflow.train.losses import MultiResolutionSTFTLoss, masked_l1_loss
 from voxflow.train.trainer import TrainConfig, Trainer
 

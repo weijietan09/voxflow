@@ -18,10 +18,10 @@ from voxflow.audio.io import load_wav, peak_normalize
 from voxflow.audio.mel import MelSpectrogram
 from voxflow.config import AudioConfig
 from voxflow.models.duration import DurationPredictor, regulate_length
-from voxflow.models.estimator import EstimatorConfig, VectorFieldEstimator
 from voxflow.models.flow_matching import ConditionalFlowMatching
 from voxflow.models.speaker_encoder import SpeakerEncoder, SpeakerEncoderConfig
 from voxflow.models.text_encoder import TextEncoder, TextEncoderConfig
+from voxflow.models.velocity_field import EstimatorConfig, VectorFieldEstimator
 from voxflow.models.vocoder import GriffinLimVocoder
 from voxflow.text.frontend import TextFrontend
 from voxflow.text.symbols import DEFAULT_TABLE, SymbolTable

@@ -17,7 +17,7 @@ import torch
 import torch.nn.functional as F
 from torch import nn
 
-from voxflow.models.estimator import VectorFieldEstimator
+from voxflow.models.velocity_field import VectorFieldEstimator
 
 
 class ConditionalFlowMatching(nn.Module):
