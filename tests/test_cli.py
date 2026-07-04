@@ -38,3 +38,9 @@ def test_synth_writes_wav(tmp_path):
     rc = cli.main(["synth", "你好", "-r", str(ref), "-o", str(out), "--steps", "2"])
     assert rc == 0
     assert out.exists()
+
+
+def test_synth_missing_reference_returns_nonzero(tmp_path, capsys):
+    rc = cli.main(["synth", "你好", "-r", str(tmp_path / "nope.wav"), "--steps", "2"])
+    assert rc == 2
+    assert "不存在" in capsys.readouterr().err
