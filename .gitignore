@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+*.egg
+
+# Virtual envs
+.venv/
+venv/
+env/
+
+# Testing / coverage
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Checkpoints / data / audio artifacts
+*.pt
+*.pth
+*.ckpt
+*.wav
+*.flac
+!tests/**/*.wav
+data/
+runs/
+logs/
+outputs/
+
+# Editors / OS
+.idea/
+.vscode/
+.DS_Store
