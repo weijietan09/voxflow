@@ -1,0 +1,22 @@
+# 条件流匹配声学模型配置
+estimator:
+  n_mels: 80
+  hidden: 128
+  spk_dim: 256
+  time_dim: 128
+  depth: 2
+  heads: 4
+
+flow_matching:
+  sigma_min: 1.0e-4
+
+sampling:
+  n_timesteps: 10
+  temperature: 1.0
+
+train:
+  lr: 1.0e-4
+  weight_decay: 0.0
+  batch_size: 16
+  grad_clip: 1.0
+  max_steps: 200000

@@ -1,0 +1,21 @@
+# 说话人编码器（d-vector）配置
+# 说话人编码器使用独立的 16 kHz / 40 维 mel
+audio:
+  sample_rate: 16000
+  n_fft: 400
+  hop_length: 160
+  win_length: 400
+  n_mels: 40
+  f_min: 0.0
+  f_max: 8000.0
+
+model:
+  mel_dim: 40
+  hidden_size: 256
+  num_layers: 3
+  embedding_dim: 256
+
+# partial-utterance 平均的窗口设置（单位：帧）
+inference:
+  partial_frames: 160
+  hop_frames: 80
