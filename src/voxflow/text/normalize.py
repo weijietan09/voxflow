@@ -94,13 +94,17 @@ def normalize(text: str, language: str = "zh") -> str:
 
 
 def fullwidth_to_halfwidth(text: str) -> str:
-    """把全角 ASCII 字符和全角空格转成半角。"""
+    """把全角字母 / 数字 / 空格转成半角，保留全角标点。
+
+    中文标点（，。！？ 等）承担停顿与语气信息，交给后续步骤处理，
+    这里不把它们折叠成 ASCII 标点。
+    """
     out = []
     for ch in text:
         code = ord(ch)
         if code == _FULLWIDTH_SPACE:
             out.append(" ")
-        elif 0xFF01 <= code <= 0xFF5E:
+        elif 0xFF10 <= code <= 0xFF19 or 0xFF21 <= code <= 0xFF3A or 0xFF41 <= code <= 0xFF5A:
             out.append(chr(code - _FULLWIDTH_OFFSET))
         else:
             out.append(ch)
